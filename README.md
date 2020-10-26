@@ -1,11 +1,21 @@
-# `app`
-
-> TODO: description
+# Umajs-demo
+Umajs 使用示例
 
 ## Usage
 
+安装依赖：
 ```
-const app = require('app');
+npm i
+```
+或者
+```
+yarn
+```
+启动项目：
+```
+npm run dev
+```
 
-// TODO: DEMONSTRATE API
-```
+[在线文档](https://umajs.gitee.io/)
+
+[源码地址](https://github.com/wuba/Umajs)
