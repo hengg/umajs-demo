@@ -9,41 +9,41 @@ import {
     RequestMethod,
     Aspect,
     Service,
-    // Result,
     Inject,
 } from '@umajs/core';
 import { Body, Require } from '@umajs/arg-decorator';
-import TestService from '../service/test.service';
 import UserService from '../service/user.service';
 import { AgeCheck } from '../decorator/AgeCheck';
 import { MyQuery } from '../decorator/MyQuery';
 import { GetUser, UserDTO } from '../decorator/UserDTO';
 import Timestamp from '../utils/timestamp';
 import { Result } from '../plugins/result/index';
+import { DateCheck } from '../decorator/DateCheck';
 
+@Aspect.before('test')
 export default class Index extends BaseController {
     // 注入自定义的工具类实例
-    @Inject('timestamp')
+    @Inject(Timestamp)
     timestamp: Timestamp;
 
     // 快捷注入service 实例
-    @Service('test')
-    testService: TestService;
-
-    @Service('user')
+    @Service(UserService)
     userService: UserService;
 
     // Result.view
     index() {
-        return Result.view('index.html', {
-            frameName: this.testService.returnFrameName(),
-        });
+        return Result.view('index.html');
     }
 
     // 私有方法
     @Private
     inline() {
         return Result.send('this is private router');
+    }
+
+    @Path('/age')
+    age(@AgeCheck('age') age: number, @DateCheck('date') date: string) {
+        return Result.send(`date is ${date}, age is ${age}`);
     }
 
     /**

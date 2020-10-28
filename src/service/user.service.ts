@@ -10,7 +10,7 @@ export default class UserService extends BaseService {
     }
 
     addUser(dto: UserDTO) {
-        console.log(dto);
+        console.log(dto, this.ctx);
 
         return dto;
     }

@@ -2,7 +2,7 @@ import { createArgDecorator, IContext } from '@umajs/core';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function yyyymmddToTimestamp(date:string) {
-    return 123;
+    return new Date(date).valueOf();
 }
 
 export const DateCheck = createArgDecorator(

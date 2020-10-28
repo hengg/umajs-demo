@@ -4,15 +4,16 @@ import { IAspect, IProceedJoinPoint, Result } from '@umajs/core';
 export default class implements IAspect {
     
     async around(proceedPoint: IProceedJoinPoint<any>) {
+        const { proceed, args,target } = proceedPoint;
         // 模拟权限检查
-        if(proceedPoint.target.ctx.uid===undefined){
+        if(target.ctx.uid===undefined){
             return Result.json({
                 code: -1,
                 message: '您暂无权限'
             })
         }
 
-        const result = await proceedPoint.proceed();
+        const result = await proceed(...args);
 
         return result;
     }

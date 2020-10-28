@@ -3,13 +3,14 @@ import Timestamp from '../utils/timestamp';
 
 /* eslint-disable */
 export default class implements IAspect {
-    @Inject('timestamp')
+    @Inject(Timestamp)
     timestamp: Timestamp;
 
     async around(proceedPoint: IProceedJoinPoint<any>) {
-        const result = await proceedPoint.proceed();
-        const stamp = this.timestamp.getTimestamp();
+        const { proceed, args } = proceedPoint;
+        const result = await proceed(...args);
+        result.stamp = this.timestamp.getTimestamp();
 
-        return { ...result, stamp };
+        return result;
     }
 }
