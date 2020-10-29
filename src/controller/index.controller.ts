@@ -18,7 +18,7 @@ import { MyQuery } from '../decorator/MyQuery';
 import { GetUser, UserDTO } from '../decorator/UserDTO';
 import Timestamp from '../utils/timestamp';
 import { Result } from '../plugins/result/index';
-import { DateCheck } from '../decorator/DateCheck';
+import { ToTimestamp } from '../decorator/ToTimestamp';
 
 @Aspect.before('test')
 export default class Index extends BaseController {
@@ -42,8 +42,8 @@ export default class Index extends BaseController {
     }
 
     @Path('/age')
-    age(@AgeCheck('age') age: number, @DateCheck('date') date: string) {
-        return Result.send(`date is ${date}, age is ${age}`);
+    age(@AgeCheck('age') age: number, @ToTimestamp('date') stamp: string) {
+        return Result.send(`stamp is ${stamp}, age is ${age}`);
     }
 
     /**

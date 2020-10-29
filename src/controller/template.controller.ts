@@ -1,16 +1,9 @@
-import { BaseController, Path, Aspect, Query, Result, Param } from '@umajs/core';
-import { AgeCheck } from '../decorator/AgeCheck';
+import { BaseController, Path, Aspect, Query, Result } from '@umajs/core';
 
 @Path('/tpl')
 export default class Template extends BaseController {
     index() {
         return Result.send('this is index router in template');
-    }
-
-    @Path('/reg/:name*')
-    @Aspect.around('test')
-    reg(@AgeCheck('age') age: number, @Param('name') name: string) {
-        return Result.send(`this is reg router. ${name} ${age}`);
     }
 
     @Aspect.around('mw')
@@ -22,7 +15,11 @@ export default class Template extends BaseController {
     }
 
     @Path('/ns')
+    @Aspect('result')
     notSend() {
         console.log('.....This will not send any msg...');
+        this.ctx.body = 'emmmm';
+
+        return Result.done();
     }
 }

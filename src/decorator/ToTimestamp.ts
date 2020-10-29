@@ -5,7 +5,7 @@ function yyyymmddToTimestamp(date:string) {
     return new Date(date).valueOf();
 }
 
-export const DateCheck = createArgDecorator(
+export const ToTimestamp = createArgDecorator(
     (ctx: IContext, dateKey: string) => {
         const yyyymmdd = ctx.query[dateKey];
 

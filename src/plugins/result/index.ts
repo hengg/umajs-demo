@@ -7,7 +7,7 @@ type TRedirect2 = {
 
 export class Result extends R {
     static redirect2(url: string, status: number) {
-        return new Result({
+        return new Result(<any>{
             type: 'redirect2',
             data: {
                 url,

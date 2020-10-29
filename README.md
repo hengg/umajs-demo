@@ -19,3 +19,7 @@ yarn
 ```
 npm run dev
 ```
+
+项目启动后，您可以通过访问以下 URL 体验 Umajs：
+- [http://localhost:8058](http://localhost:8058)
+- [http://localhost:8058/tpl/test](http://localhost:8058/tpl/test)

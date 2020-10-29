@@ -1,5 +1,7 @@
 import { Uma, IContext, TPlugin, RequestMethod } from '@umajs/core';
 
+import mw from '../../utils/mw';
+
 export default (uma: Uma, options: any = {}): TPlugin => {
     console.log(options);
 
@@ -8,11 +10,7 @@ export default (uma: Uma, options: any = {}): TPlugin => {
             test: 123,
         },
         use: {
-            async handler(ctx: IContext, next: Function) {
-                console.log('use before');
-                await next();
-                console.log('use after');
-            },
+            handler: mw,
         },
         method: {
             type: RequestMethod.GET,
