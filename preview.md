@@ -12,7 +12,7 @@ Umajs 是一个简单易用、扩展灵活，基于 TypeScript 的 Node.js Web �
 首先，Umajs 的核心优势体现在以下几个方面：
 
 - **参数装饰器** 内置丰富的参数装饰器，同时也支持自定义参数装饰器；通过参数装饰器可以快速的提取、校验、转换、聚合用户输入为我们所需要的格式；
-- **统一返回** 通过统一返回机制，我们可以快速的对返回结果进行修改；当然框架也支持普通的返回方式；
+- **统一返回** 统一返回是 Controller 的便捷返回。通过统一返回机制，我们可以快速的对返回结果进行修改；当然框架也支持普通的返回方式；
 - **切面** 运用切面机制可以显著提高代码的可复用性、降低业务逻辑之间的耦合度；Umajs 可以轻松的将中间件转换为切面方法以便于复用 Koa 社区丰富的中间件资源；
 - **依赖注入** 依赖注入在降低业务逻辑耦合度的同时，还对性能有一定的提升；
 
@@ -48,7 +48,7 @@ getUser(@Param('id') uid: string, @Query('role') role: string) {
 
 同样的，对于 `POST` 请求，框架提供了 `@Body` 装饰器来快捷获取body数据。
 
-通过框架内置的这些参数装饰器获取参数称的上是轻巧快捷了，但是参数装饰器的功能不仅于此，框架还提供了自定义参数装饰器的功能以便于针对不同的业务场景做定制化处理。接下来我们看一下如何实现自定义参数装饰器：
+通过框架内置的这些参数装饰器获取请求的参数称的上是轻巧快捷了，但是参数装饰器的功能不仅于此，框架还提供了自定义参数装饰器的功能以便于针对不同的业务场景做定制化处理。接下来我们看一下如何实现自定义参数装饰器：
 ```ts
 // decorator/MyQuery.ts
 import { createArgDecorator, IContext } from '@umajs/core';
@@ -91,8 +91,8 @@ export const AgeCheck = createArgDecorator(
 在实际应用中我们还有如下场景，前端传递的是 yyyy-MM-dd 格式的日期数据，而数据库或者第三方服务需要的是时间戳格式，那么我们也可以在自定义参数装饰器中对其进行转换：
 
 ```TS
-// decorator/DateCheck.ts
-export const DateCheck = createArgDecorator(
+// decorator/ToTimestamp.ts
+export const ToTimestamp = createArgDecorator(
     (ctx: IContext, dateKey: string) => {
         const dateStr = ctx.query[dateKey];
         // 转换 yyyyMMdd 为时间戳
@@ -149,7 +149,7 @@ age(@AgeCheck('age') age: number, @DateCheck('date') date: string) {
 
 ![dto](./docs/imgs/dto.png)
 
-此时我们可以使用自定义参数装饰器来封装这些繁琐的、从不同地方获取字段值的操作：
+针对这请清空我们可以使用自定义参数装饰器来封装这些繁琐的、从不同地方获取字段值的操作：
 
 ```TS
 // decorator/UserDTO.ts
@@ -224,7 +224,7 @@ export const AgeCheck = createArgDecorator(
 );
 ```
 
-想必朋友们也发现了，又是这个 `AgeCheck` 的代码。放心，代码没有粘错😁 。在这个章节里我们的关注点和上一章有所不同：相信大家都注意到了，当参数校验未通过的时候，我们通过 `return Result.json(data)` 这段代码把对应的错误信息抛给了接口。
+想必朋友们也发现了，又是这个 `AgeCheck` 的代码。放心，代码没有粘错😁 。在这个章节里我们的关注点和上一章有所不同：请大家注意，当参数校验未通过的时候，我们通过 `return Result.json(data)` 这段代码把对应的错误信息抛给了接口。
 
 这就是 Umajs 的统一返回机制: 在 Controller 的方法里返回 `Result` 而不是直接操作 `context`。统一返回本质上仍是对如下传统方式的包装，并且 Umajs 仍然支持传统的方式。
 
@@ -233,7 +233,13 @@ ctx.body = 'happy hacking';
 ctx.status = 200;
 ```
 
-但是传统方式如果想通过装饰器对返回结果进行修改是比较麻烦的，而使用了统一返机制则相当简单。譬如上述 `AgeCheck` 装饰器，在校验未通过后可以直接返回 `Result`，这个返回值代替了被修饰的 Controller 方法的返回值；对比在没有统一返回的情况下，是不是方便了很多？
+但是传统方式如果想对返回结果进行修改是比较麻烦的，而使用了统一返机制则相当简单。譬如上述 `AgeCheck` 装饰器，在校验未通过后可以直接返回 `Result`，这个返回值代替了被修饰的 Controller 方法的返回值；
+
+![ctx](./docs/imgs/tra_ctx.png)
+
+在没有统一返回的情况下，如果想要拦截返回值，我们在 `AgeCheck` 装饰器中直接修改了 `ctx`；而在执行 Controller 方法的时候仍然会对 `ctx` 进行修改。而装饰器的执行机制决定了 `AgeCheck` 装饰器所修改的 `ctx` 会被目标方法的修改覆盖掉。如果在 `AgeCheck` 装饰器中主动抛出异常固然阻止了目标方法修改 `ctx`，但是又需要进行额外的异常处理；
+
+对比之下，统一返回机制是不是方便了很多？
 
 ### 修改当前返回值
 
@@ -253,7 +259,7 @@ export default class implements IAspect {
     }
 }
 ```
-上述代码是一个切面方法，该方法为返回值增加了一个时间戳字段。是不是很轻松就实现了对返回值的修改？
+上述代码是一个切面方法，通过切面的 around 方法获取到了目标方法执行后的返回值，并且为这个返回值增加了一个时间戳字段。是不是很轻松就实现了对返回值的修改？
 
 > 关于切面以及 `@Inject` 装饰器会在稍后讨论。
 
@@ -288,11 +294,11 @@ export default class implements IAspect {
 
 可以看到，切面有如下几个方法：
 
-- around 环绕通知
-- before 前置通知
-- after 后置通知
-- afterReturing 最终通知
-- afterThrowing 异常通知
+- around 环绕通知，包裹目标方法；
+- before 前置通知，在目标方法之前执行；
+- after 后置通知，在目标方法之后执行；
+- afterReturing 最终通知，方法执行成功后执行该切面；
+- afterThrowing 异常通知，处理未捕获的异常。
 
 首先执行 around 的 before 部分，接下来执行 before ，然后是目标方法的执行；
 
@@ -589,15 +595,17 @@ export default class User extends BaseController {
 
 他们的应用场景分别如下：
 
-- try-catch: 适合对方法单独进行错误处理
-- Aspect: 更具可复用性，可以对多个方法进行错误处理
-- plugin-status: 对整个系统在运行中未被捕获的错误的兜底操作，让系统更健壮，同时除了错误处理外，更多的是对不同状态码的统一处理
+- try-catch: 在方法中对目标代码单独进行错误处理，适用于比较独特的业务场景；
+- Aspect: 可以对多个方法进行错误处理，更具可复用性，适用于处理通用性更强的异常；
+- plugin-status: 对整个系统在运行中未被捕获的错误的兜底操作。它除了错误处理外，更多的是对不同状态码的统一处理。
 
 ## 小结
 
-- 参数装饰器
-- 统一返回机制
-- Aspect
-- 插件
-- IOC
-- 异常处理
+最后回顾一下：
+
+- **参数装饰器** Umajs 内置丰富的参数装饰器，同时提供强大的自定义参数装饰器功能，用于处理输入；
+- **统一返回机制** Umajs 的统一返回机制使得我们可以更便捷、更灵活的处理 Controller 方法返回值；
+- **Aspect** 切面和参数装饰器、统一返回机制的有机结合足以面对绝大多数的复杂业务场景；
+- **插件** 插件不仅仅是复用中间件，同时也是扩展框架的重要方式;
+- **IOC**
+- **异常处理**

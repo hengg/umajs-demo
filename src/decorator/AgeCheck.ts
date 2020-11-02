@@ -1,6 +1,8 @@
 import { createArgDecorator, Result, IContext } from '@umajs/core';
 
 export const AgeCheck = createArgDecorator((ctx: IContext, ageKey: string) => {
+    console.log('age check');
+
     let age = ctx.query[ageKey];
 
     if (age === undefined) {
