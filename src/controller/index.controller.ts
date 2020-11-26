@@ -63,7 +63,7 @@ export default class Index extends BaseController {
      * - 使用 @Body 装饰器快捷获取 POST 请求参数
      * */
     @Path({
-        value: ['/submit', '/yu/:id'],
+        value: ['/submit', '/yu/:id', '/mr'],
         method: RequestMethod.POST,
     })
     submit(@Body('age') age: string) {
